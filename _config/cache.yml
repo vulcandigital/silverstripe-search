@@ -1,0 +1,5 @@
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.vulcanSearch:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: "vulcanSearch"
