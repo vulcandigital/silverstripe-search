@@ -33,6 +33,9 @@ class SearchIndexEntry extends DataObject
         'Tank' => SearchTank::class
     ];
 
+    /**
+     * @return SearchIndexExtension|DataObject
+     */
     public function getRecord()
     {
         /** @var static $class */
@@ -104,6 +107,8 @@ class SearchIndexEntry extends DataObject
         $index->SearchableText = $string;
         $index->TankID = $tank->ID;
         $index->write();
+
+        $record->SearchTankID = $tank->ID;
 
         return $index;
     }

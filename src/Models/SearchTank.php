@@ -2,6 +2,7 @@
 
 namespace Vulcan\Search\Models;
 
+use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\HasManyList;
 use Vulcan\Search\Extensions\SearchIndexExtension;
@@ -10,9 +11,9 @@ use Vulcan\Search\Extensions\SearchIndexExtension;
  * Class SearchTank
  * @package Vulcan\Search\Models
  *
- * @property string                         Title
+ * @property string Title
  *
- * @property HasManyList|SearchIndexEntry[] Index
+ * @@method HasManyList|SearchIndexEntry[] Index
  */
 class SearchTank extends DataObject
 {
@@ -79,5 +80,30 @@ class SearchTank extends DataObject
         }
 
         return $classesWithTank;
+    }
+
+    /**
+     * Use to swap the indexes for a particular tank to another
+     *
+     * @param SearchTank|string $newTank
+     *
+     * @return DataObject|SearchTank
+     */
+    public function swapIndexToNewTank($newTank)
+    {
+        if (is_string($newTank)) {
+            $newTank = SearchTank::findOrCreateTank($newTank);
+        }
+
+        foreach ($this->Index() as $record) {
+            $record->TankID = $newTank->ID;
+            $record->write();
+
+            $record = $record->getRecord();
+            $record->SearchTankID = $newTank->ID;
+            $record->write();
+        }
+
+        return $newTank;
     }
 }

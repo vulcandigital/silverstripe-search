@@ -4,21 +4,52 @@ namespace Vulcan\Search\Extensions;
 
 use Psr\SimpleCache\CacheInterface;
 use SilverStripe\Core\ClassInfo;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Flushable;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\View\SSViewer;
 use SilverStripe\View\ThemeResourceLoader;
 use Vulcan\Search\Models\SearchIndexEntry;
+use Vulcan\Search\Models\SearchTank;
 
 /**
  * Class SearchIndexExtension
  * @package Vulcan\Search\Extensions
+ *
+ * @property int SearchTankID
+ * @method SearchTank SearchTank
  */
 class SearchIndexExtension extends DataExtension implements Flushable
 {
     private static $search_tank = 'Main';
+
+    private static $has_one = [
+        'SearchTank' => SearchTank::class
+    ];
+
+    public function updateCMSFields(FieldList $fields)
+    {
+        parent::updateCMSFields($fields);
+
+        $fields->removeByName('SearchTank');
+    }
+
+    public function onBeforeWrite()
+    {
+        parent::onBeforeWrite();
+
+        /** @var static|DataObject $owner */
+        $owner = $this->owner;
+        if (!$owner->SearchTank()->exists()) {
+            SearchIndexEntry::unindexRecord($owner);
+            $owner->SearchTankID = 0;
+        } elseif ($owner->SearchTank()->Title != $owner->config()->get('search_tank')) {
+            $owner->SearchTank()->swapIndexToNewTank($owner->config()->get('search_tank'));
+        }
+    }
 
     /**
      * We want to index the record on write. If the record is an instance of Page the record will be indexed only if the page is published
