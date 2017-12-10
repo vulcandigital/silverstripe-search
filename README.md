@@ -33,7 +33,7 @@ class Recipe extends DataObject
         'Title' => 'Varchar(255)',
         'Content' => 'HTMLText',
         'SomeRandomFieldWithContent' => 'Text',
-        'UselessField' => 'Boolean    
+        'UselessField' => 'Boolean'
     ];
     
     // Showing the use of Dot Notation in searchableColumns()
