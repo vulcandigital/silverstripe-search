@@ -58,7 +58,7 @@ class SearchPageController extends \PageController
     public function getResults(HTTPRequest $request)
     {
         $q = $request->getVar('q');
-        $show = $request->getVar('show') ?? 25;
+        $pageSize = $request->getVar('show') ?? 25;
         $filter = $request->getVar('filter') ?? null;
         $sort = $request->getVar('sort') ?? null;
 
@@ -94,7 +94,7 @@ class SearchPageController extends \PageController
 
         return $this->render([
             'SearchTerm'    => $term,
-            'SearchResults' => SearchIndexEntry::paginatedSearch($q, $sort, $classFilters, $request, $show)
+            'SearchResults' => SearchIndexEntry::paginatedSearch($q, $this->Tank(), $sort, $classFilters, $request, $pageSize)
         ]);
     }
 
@@ -109,6 +109,11 @@ class SearchPageController extends \PageController
         $filterMap = [];
 
         foreach ($tankClasses as $class) {
+            if (singleton($class) instanceof \Page) {
+                $filterMap['pages'] = \Page::class;
+                continue;
+            }
+
             $name = Config::inst()->get($class, 'search_filter_name') ?? basename($class);
 
             $filterMap[$name] = $class;

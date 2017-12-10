@@ -16,6 +16,7 @@ use Vulcan\Search\Extensions\SearchIndexExtension;
  * @property string Model
  * @property int    RecordID
  * @property string SearchableText
+ * @property bool   IsPage
  *
  * @property int    TankID
  *
@@ -26,7 +27,8 @@ class SearchIndexEntry extends DataObject
     private static $db = [
         'Model'          => 'Varchar(255)',
         'RecordID'       => 'Int',
-        'SearchableText' => 'Text'
+        'SearchableText' => 'Text',
+        'IsPage'         => 'Boolean'
     ];
 
     private static $has_one = [
@@ -99,10 +101,17 @@ class SearchIndexEntry extends DataObject
         }
 
         $index = SearchIndexEntry::create();
+        $index->Created = $record->Created;
+        $index->LastEdited = $record->LastEdited;
         $index->Model = $record->ClassName;
         $index->RecordID = $record->ID;
         $index->SearchableText = $string;
         $index->TankID = $tank->ID;
+
+        if ($record instanceof \Page) {
+            $index->IsPage = true;
+        }
+
         $index->write();
 
         return $index;
@@ -145,22 +154,44 @@ class SearchIndexEntry extends DataObject
     }
 
     /**
-     * @param                     $query
-     * @param string|SortFilter   $sortSql
-     * @param string|array        $classFilter
+     * @param                   $query
+     * @param int|SearchTank    $tankOrId
+     * @param string|SortFilter $sortSql
+     * @param string|array      $classFilter
      *
      * @return DataList|SearchIndexEntry[]
      */
-    public static function search($query, $sortSql = null, $classFilter = null)
+    public static function search($query, $tankOrId = null, $sortSql = null, $classFilter = null)
     {
+        if (!$tankOrId) {
+            $tankOrId = SearchTank::findOrCreateTank('Main')->ID;
+        } elseif ($tankOrId instanceof SearchTank) {
+            $tankOrId = $tankOrId->ID;
+        }
+
         $records = SearchIndexEntry::get()->filter([
-            'SearchableText:PartialMatch' => explode(' ', $query)
+            'SearchableText:PartialMatch' => explode(' ', $query),
+            'TankID'                      => $tankOrId
         ]);
 
         if ($classFilter) {
-            $records = $records->filter([
+            $filter = [
                 'Model' => $classFilter
-            ]);
+            ];
+
+            $hasPages = false;
+            foreach ($classFilter as $class) {
+                if (singleton($class) instanceof \Page) {
+                    $hasPages = true;
+                    break;
+                }
+            }
+
+            if ($hasPages) {
+                $filter['IsPage'] = true;
+            }
+
+            $records = $records->filterAny($filter);
         }
 
         if ($sortSql) {
@@ -178,6 +209,7 @@ class SearchIndexEntry extends DataObject
 
     /**
      * @param                   $query
+     * @param null              $tankOrId
      * @param string|SortFilter $sortSql
      * @param string|array      $classFilter
      *
@@ -186,9 +218,9 @@ class SearchIndexEntry extends DataObject
      *
      * @return PaginatedList
      */
-    public static function paginatedSearch($query, $sortSql = null, $classFilter = null, HTTPRequest $request = null, $pageSize = 25)
+    public static function paginatedSearch($query, $tankOrId = null, $sortSql = null, $classFilter = null, HTTPRequest $request = null, $pageSize = 25)
     {
-        $results = static::search($query, $sortSql, $classFilter);
+        $results = static::search($query, $tankOrId, $sortSql, $classFilter);
 
         $pagedList = PaginatedList::create($results, ($request) ? $request : Controller::curr()->getRequest())->setPageLength($pageSize);
 

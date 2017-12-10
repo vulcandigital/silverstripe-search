@@ -18,10 +18,6 @@ if (!window.jQuery) {
             window.location = '/search/?' + $.param(searchParams)
         });
 
-        $('.search-result').on('click', function () {
-            window.location = $(this).attr('data-link');
-        });
-
         $('#searchSort').on('change', function () {
             var searchParams = buildSearchParams();
             searchParams.sort = $(this).val();

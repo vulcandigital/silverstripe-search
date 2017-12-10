@@ -52,13 +52,6 @@ class BuildIndex extends BuildTask
         $this->outputText('');
         $this->outputText('');
 
-        if ($cleared = $this->clearObsoleteRecords()) {
-            $this->outputText(sprintf('Cleared %s obsolete records', $cleared));
-
-            $this->outputText('');
-            $this->outputText('');
-        }
-
         $this->outputText('#### COMPLETED');
     }
 
@@ -143,33 +136,19 @@ class BuildIndex extends BuildTask
         }
 
         $index = SearchIndexEntry::create();
+        $index->Created = $record->Created;
         $index->Model = $record->ClassName;
         $index->RecordID = $record->ID;
         $index->SearchableText = $string;
         $index->TankID = $tank->ID;
+
+        if ($record instanceof \Page) {
+            $index->IsPage = true;
+        }
+
         $this->indexedIds[$tank->ID][] = $index->write();
 
         $this->outputText('.', false);
-    }
-
-    public function clearObsoleteRecords()
-    {
-        $count = 0;
-
-        foreach ($this->indexedIds as $tankId => $ids) {
-            /** @var DataList|SearchIndexEntry[] $records */
-            $records = SearchIndexEntry::get()->filter([
-                'ID:not' => $ids,
-                'TankID' => $tankId
-            ]);
-
-            foreach ($records as $record) {
-                $count++;
-                $record->delete();
-            }
-        }
-
-        return $count;
     }
 
     public function outputText($text, $break = true)
