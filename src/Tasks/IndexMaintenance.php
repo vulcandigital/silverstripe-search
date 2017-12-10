@@ -92,6 +92,10 @@ class IndexMaintenance extends BuildTask
         $this->outputText('## COMPLETED');
     }
 
+    /**
+     * @param      $text
+     * @param bool $break
+     */
     public function outputText($text, $break = true)
     {
         if ($break) {
