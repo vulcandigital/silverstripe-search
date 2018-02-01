@@ -3,7 +3,7 @@
   "description": "A full text search replacement concept for SilverStripe that enables the use of tanks",
   "type": "silverstripe-vendormodule",
   "homepage": "https://github.com/vulcandigital/silverstripe-search",
-  "license": "BSD-3 Clause",
+  "license": "BSD-3-Clause",
   "authors": [
     {
       "name": "Reece Alexander",
