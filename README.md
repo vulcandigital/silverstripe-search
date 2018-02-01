@@ -67,7 +67,7 @@ If you have just applied the extension to a DataObject or Page _with_ existing r
 
 As new records are added to a `DataObject` they will also be indexed. When a record is deleted, the index entry will be deleted also
 
-If the `DataObject` is `Page`, new records will only be indexed if the page is unpublished, and unindexed when the page is unpublished or deleted 
+If the `DataObject` is `Page`, new records will only be indexed if the page is published, and unindexed when the page is unpublished or deleted 
 
 ### 3. Create the search page
 Open up the CMS, and create a new **SearchPage**. This can be a root item or a child of any other page
