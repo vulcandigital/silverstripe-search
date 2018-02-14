@@ -4,10 +4,13 @@ namespace Vulcan\Search\Pages;
 
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\i18n\i18n;
 use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\HasManyList;
 use SilverStripe\View\Requirements;
+use Vulcan\NzClassics\Models\Location;
 use Vulcan\Search\Models\SearchIndexEntry;
 use Vulcan\Search\Models\SearchTank;
 use Vulcan\Search\Models\SortFilter;
@@ -58,7 +61,8 @@ class SearchPageController extends \PageController
     public function getResults(HTTPRequest $request)
     {
         $q = $request->getVar('q');
-        $show = $request->getVar('show') ?? 25;
+
+        $pageSize = $request->getVar('show') ?? 25;
         $filter = $request->getVar('filter') ?? null;
         $sort = $request->getVar('sort') ?? null;
 
@@ -93,9 +97,15 @@ class SearchPageController extends \PageController
         $term->setValue($q);
 
         return $this->render([
+            'Title' => $term . ' - ' ._t('VulcanSearch.SEARCH', 'Search'),
             'SearchTerm'    => $term,
-            'SearchResults' => SearchIndexEntry::paginatedSearch($q, $sort, $classFilters, $request, $show)
+            'SearchResults' => SearchIndexEntry::paginatedSearch($q, $this->Tank(), $sort, $classFilters, $request, $pageSize)
         ]);
+    }
+
+    public function getSearchQuery()
+    {
+        return $this->getRequest()->getVar('q');
     }
 
     /**
@@ -109,7 +119,14 @@ class SearchPageController extends \PageController
         $filterMap = [];
 
         foreach ($tankClasses as $class) {
-            $name = Config::inst()->get($class, 'search_filter_name') ?? basename($class);
+            if (singleton($class) instanceof \Page) {
+                $filterMap['pages'] = \Page::class;
+                continue;
+            }
+
+            /** @var DataObject $singleton */
+            $singleton = singleton($class);
+            $name = $singleton->i18n_plural_name();
 
             $filterMap[$name] = $class;
         }

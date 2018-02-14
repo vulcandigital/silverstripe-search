@@ -1,4 +1,4 @@
-<ul class="filtersWrapper">
+<ul class="filter-list">
     <% loop $FilterMap %>
         <li>
             <div class="field checkbox">

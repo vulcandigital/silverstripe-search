@@ -18,8 +18,6 @@ use Vulcan\Search\Models\SearchIndexEntry;
  */
 class SearchIndexExtension extends DataExtension implements Flushable
 {
-    private static $search_tank = 'Main';
-
     /**
      * We want to index the record on write. If the record is an instance of Page the record will be indexed only if the page is published
      * or unindexed if otherwise
@@ -59,7 +57,10 @@ class SearchIndexExtension extends DataExtension implements Flushable
      */
     public function searchableColumns()
     {
-        return [];
+        return [
+            'Title',
+            'Content'
+        ];
     }
 
     /**
@@ -86,7 +87,7 @@ class SearchIndexExtension extends DataExtension implements Flushable
             }
         }
 
-        $cache->set('extendedClasses', $classes);
+        $cache->set('extendedClasses', $classesWithExtension);
 
         return $classesWithExtension;
     }
@@ -101,6 +102,7 @@ class SearchIndexExtension extends DataExtension implements Flushable
         /** @var CacheInterface $cache */
         $cache = Injector::inst()->get(CacheInterface::class . '.vulcanSearch');
         $cache->delete('extendedClasses');
+        $cache->clear();
 
         static::extendedClasses();
     }

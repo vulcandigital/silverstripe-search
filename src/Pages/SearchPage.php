@@ -20,6 +20,8 @@ use Vulcan\Search\Models\SortFilter;
  */
 class SearchPage extends \Page
 {
+    private static $table_name = 'VulcanSearchPage';
+
     private static $has_one = [
         'Tank' => SearchTank::class
     ];

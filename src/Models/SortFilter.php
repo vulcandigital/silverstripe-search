@@ -16,6 +16,8 @@ use SilverStripe\ORM\DataObject;
  */
 class SortFilter extends DataObject
 {
+    private static $table_name = 'VulcanSortFilter';
+
     private static $db = [
         'Title' => 'Varchar(255)',
         'SortSql' => 'Varchar(255)'

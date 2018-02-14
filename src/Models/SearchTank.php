@@ -16,6 +16,8 @@ use Vulcan\Search\Extensions\SearchIndexExtension;
  */
 class SearchTank extends DataObject
 {
+    private static $table_name = 'VulcanSearchTank';
+
     private static $db = [
         'Title' => 'Varchar(255)'
     ];
@@ -73,7 +75,9 @@ class SearchTank extends DataObject
         $classesWithTank = [];
 
         foreach ($classes as $class) {
-            if (singleton($class)->config()->get('search_tank') == $tank) {
+            $configuredTank = singleton($class)->config()->get('search_tank');
+
+            if (!$configuredTank && $tank == 'Main' || $configuredTank == $tank) {
                 $classesWithTank[] = $class;
             }
         }
