@@ -1,5 +1,5 @@
 ## silverstripe-search
-This module is a full text search replacement concept for SilverStripe that enables the use of tanks
+This module is a single-line search replacement concept for SilverStripe that enables the use of tanks
 
 ![Preview](docs/images/example.jpg)
 
@@ -29,10 +29,6 @@ class Recipe extends DataObject
     // the search tank that records from the class are indexed under 
     // this is optional and will default to "Main" if not provided
     private static $search_tank = 'Recipes'
-    
-    // The search filter name is used when displaying the filter map on the front end
-    // if not provided, it will default to the static class name
-    private static $search_filter_name = 'Recipes';
     
     private static $db = [
         'Title' => 'Varchar(255)',
@@ -87,7 +83,16 @@ This would ensure all records within that DataObject are stored under a custom t
 
 This module ships within a default [SearchPage](src/Pages/SearchPage.php) page type. The provided template is for example only and you should create your own override for it. 
 
-## Result Item Rendering
+## Renaming the filter title
+If you want to change the name that appears for the search filter you will need to add the following to your DataObject/Page:
+
+```
+private static $singular_name = 'Instruction';
+private static $plural_name = 'Instructions';
+```
+
+
+## Result item rendering
 You may want to render your results differently based on what classes they represent (as in the preview image above).
 
 In order to do this for the above `Recipe` class you must create the following folder structure in your theme directory:
